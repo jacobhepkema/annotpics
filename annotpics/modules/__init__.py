@@ -1,3 +1,3 @@
-from interface import AnnotationInterface
+from .interface import AnnotationInterface
 
 __all__ = ['AnnotationInterface']
