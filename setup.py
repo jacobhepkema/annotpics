@@ -13,6 +13,10 @@ def setup_package():
       author = 'Jacob Hepkema',
       author_email = 'jacob.hepkema@sanger.ac.uk',
       license = 'MIT License',
+      entry_points='''
+          [console_scripts]
+          annotpics=annotpics.__main__:main
+          ''',
       packages = find_packages(),
       install_requires = install_requires
     )
