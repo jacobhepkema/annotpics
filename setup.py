@@ -4,7 +4,7 @@ from setuptools import find_packages
 import sys
 
 def setup_package():
-  install_requires = ['numpy', 'pandas', 'Pillow', 'argparse']
+  install_requires = ['numpy', 'pandas', 'Pillow', 'click']
   metadata = dict(
       name = 'meautifs',
       version = '0.0.1',
