@@ -6,7 +6,7 @@ import sys
 def setup_package():
   install_requires = ['numpy', 'pandas', 'Pillow', 'click']
   metadata = dict(
-      name = 'meautifs',
+      name = 'annotpics',
       version = '0.0.1',
       description = 'annotpics: utilities for picture annotation',
       url = 'https://github.com/jacobhepkema/annotpics',
