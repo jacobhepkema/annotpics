@@ -1,2 +1,2 @@
-# annot_pics
+# annotpics
 Annotate pictures given classes and keybindings
