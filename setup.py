@@ -4,7 +4,7 @@ from setuptools import find_packages
 import sys
 
 def setup_package():
-  install_requires = ['numpy', 'pandas', 'Pillow', 'click', 'json']
+  install_requires = ['numpy', 'pandas', 'Pillow', 'click']
   metadata = dict(
       name = 'annotpics',
       version = '0.0.1',
