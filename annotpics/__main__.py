@@ -1,7 +1,7 @@
 import sys
 import click
 
-from .interface import AnnotationInterface
+from .interface import AnnotationInterfacsdfijhse
 
 @click.version_option("0.0.1")
 @click.command()
