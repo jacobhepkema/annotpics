@@ -1,7 +1,7 @@
 import sys
 import click
 
-from annotpics.interface import AnnotationInterface
+from .interface import AnnotationInterface
 
 @click.version_option("0.0.1")
 @click.command()
