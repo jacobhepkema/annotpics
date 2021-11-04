@@ -8,7 +8,8 @@ class AnnotationInterface:
     r"""
     EXPERIMENTAL
     """
-    def __init__(self, master, 
+    def __init__(self, 
+                 master, 
                  classes, 
                  image_dir,
                  data_df,
