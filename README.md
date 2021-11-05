@@ -35,12 +35,12 @@ Example key binding config JSON file:
 ```json
 {
     "bindings": {
-        "A": "A_category",
-        "B": "B_category",
-        "C": "C_category",
-        "D": "D_category",
-        "E": "E_category",
-        "F": "F_category"
+        "a": "a_category",
+        "b": "b_category",
+        "c": "c_category",
+        "d": "d_category",
+        "e": "e_category",
+        "f": "f_category"
     }
 }
 ```
