@@ -19,7 +19,16 @@ class AnnotationInterface:
                  resize_h: int=470,
                  window_w: int=764,
                  window_h: int=1200,
-                 start_i: int=0):
+{
+    "bindings": {
+        "A": "A_category",
+        "B": "B_category",
+        "C": "C_category",
+        "D": "D_category",
+        "E": "E_category",
+        "F": "F_category"
+    }
+}                 start_i: int=0):
         self.master = master
         self.CURR_I = start_i
         self.master.title("Embryo " + str(self.CURR_I))
@@ -97,5 +106,3 @@ class AnnotationInterface:
             self.data_df.iloc[i,1+np.argwhere(self.classes == curr_class)[0][0]] = 1
             print("Set to 1")
         self.update_labels()
-
-        # return lambda curr_class, ai: set_to(ai=ai, i=ai.CURR_I, curr_class=curr_class)
