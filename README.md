@@ -1,9 +1,13 @@
 # annotpics
 Annotate pictures given classes and keybindings. Experimental, in development.
 
+## Install
+
 ```
 pip install git+https://github.com/jacobhepkema/annotpics.git
 ```
+
+## Usage
 
 ```
 Usage: annotpics [OPTIONS] IMAGE_DIR BINDINGS_JSON
@@ -22,4 +26,21 @@ Options:
   --filetype TEXT
   --version           Show the version and exit.
   --help              Show this message and exit.
+```
+
+## Key bindings
+
+Example key binding config JSON file:
+
+```json
+{
+    "bindings": {
+        "A": "A_category",
+        "B": "B_category",
+        "C": "C_category",
+        "D": "D_category",
+        "E": "E_category",
+        "F": "F_category"
+    }
+}
 ```
