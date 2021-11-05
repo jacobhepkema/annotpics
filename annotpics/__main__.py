@@ -9,7 +9,6 @@ import numpy as np
 from PIL import ImageTk, Image
 from tkinter import Tk
 
-from annotpics.modules.interface import AnnotationInterface
 from .modules.interface import AnnotationInterface
 
 @click.version_option("0.0.1")
@@ -23,9 +22,13 @@ from .modules.interface import AnnotationInterface
 @click.option('--start_i', default=0, required=False)
 @click.option('--window_w', default=764, required=False)
 @click.option('--window_h', default=1200, required=False)
+@click.option('--resize_w', default=382, required=False)
+@click.option('--resize_h', default=470, required=False)
 @click.option('--filetype', default='jpg', required=False)
 def main(image_dir, bindings_json, csv,
-         o, start_i, window_w, window_h,
+         o, start_i,
+         window_w, window_h,
+         resize_w, resize_h,
          filetype):
     r"""
     EXPERIMENTAL
@@ -34,11 +37,14 @@ def main(image_dir, bindings_json, csv,
       without the directory.
     """
     print("csv =", csv)
+    print("output file=", o)
     print("image_dir=", image_dir)
     print("bindings_json =", bindings_json)
     print("start_i =", start_i)
     print("window_w =", window_w)
     print("window_h =", window_h)
+    print("resize_w =", resize_w)
+    print("resize_h =", resize_h)
     print("filetype =", filetype)
 
     with open(bindings_json) as json_file:
@@ -56,6 +62,8 @@ def main(image_dir, bindings_json, csv,
     # If CSV is provided, use that as the annotation df (make sure the 
     # keybinding classes are a subset of the annotation classes)
     if csv is None:
+        assert not os.path.isfile(o), "csv not specified but output.csv file exists"
+
         files_in_image_dir = os.listdir(image_dir)
         image_names = list(filter(filetype_regex.match, files_in_image_dir))
         num_pictures = len(image_names)
@@ -64,20 +72,23 @@ def main(image_dir, bindings_json, csv,
         annotations = pd.concat((pd.DataFrame(image_names), pd.DataFrame(annotation_values)), axis=1)
         annotations.columns = ['image'] + annotation_classes
     else:
-        with open(csv) as csv_file:
-            annotations = pd.read_csv(csv, index_col=0)
+        annotations = pd.read_csv(csv)
         annotation_classes = [x for i,x in 
-                              enumerate(self.annotations.columns) if i>0]
+                              enumerate(annotations.columns) if i>0]
     print("annotations =", annotations)
     print(annotations['image'])
     
     root = Tk()
 
-    ai = AnnotationInterface(root, classes, image_dir, annotations,
-                             save_csv="annotation.csv", 
+    ai = AnnotationInterface(root, classes, image_dir,
+                             data_df=annotations,
+                             save_csv=o, 
                              window_w = window_w, window_h = window_h,
                              start_i = start_i)
 
+    # Key bindings
+    root.bind("<Return>", ai.prev_picture)
+    root.bind("<space>", ai.next_picture)
     root.mainloop()
 
 

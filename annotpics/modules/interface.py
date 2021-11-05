@@ -25,6 +25,8 @@ class AnnotationInterface:
         self.master.title("Embryo " + str(self.CURR_I))
         self.master.geometry(str(window_w)+"x"+str(window_h))
 
+        self.save_csv = save_csv
+
         self.classes = classes
 
         self.data_df = data_df
@@ -37,7 +39,7 @@ class AnnotationInterface:
         self.IMG_PANEL.pack(side="bottom", fill="both", expand="yes")
 
         self.curr_values = np.array(self.data_df.iloc[self.CURR_I,1:])
-        self.value_table = [x for x in zip(np.array(classes)[self.curr_values > 0], self.curr_values[self.curr_values > 0])]
+        self.value_table = [x for x in zip(np.array(self.classes)[self.curr_values > 0], self.curr_values[self.curr_values > 0])]
         self.total_rows = sum(self.curr_values > 0)
         self.TEXT = [str(x[1])+"\t"+str(x[0]) for x in self.value_table]
         self.TEXT = "\n".join(self.TEXT)
@@ -47,8 +49,8 @@ class AnnotationInterface:
 
     def update_labels(self):
         print(self.CURR_I)
-        self.curr_values = np.array(data_df.iloc[self.CURR_I,1:])
-        self.value_table = [x for x in zip(np.array(classes)[self.curr_values > 0], self.curr_values[self.curr_values > 0])]
+        self.curr_values = np.array(self.data_df.iloc[self.CURR_I,1:])
+        self.value_table = [x for x in zip(np.array(self.classes)[self.curr_values > 0], self.curr_values[self.curr_values > 0])]
         self.total_rows = sum(self.curr_values > 0)
         self.TEXT = [str(x[1])+"\t"+str(x[0]) for x in self.value_table]
         self.TEXT = "\n".join(self.TEXT)
@@ -59,13 +61,13 @@ class AnnotationInterface:
         self.master.title("Picture " + str(self.CURR_I))
         
     def update_image(self):
-        self.image_path = 'good_pics/'+data_df["image"][self.CURR_I]
+        self.image_path = f"{self.image_dir}/{self.data_df['image'][self.CURR_I]}"
         self.IMG = ImageTk.PhotoImage(Image.open(self.image_path).resize((382, 470)))
         self.IMG_PANEL.configure(image=self.IMG)
         self.IMG_PANEL.image = self.IMG
 
     def next_picture(self, event):
-        self.data_df.to_csv("table.csv", index=False)
+        self.data_df.to_csv(self.save_csv, index=False)
         print("Saved data")
 
         print("Showing next picture")	
