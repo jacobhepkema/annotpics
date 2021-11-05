@@ -13,21 +13,23 @@ class AnnotationInterface:
                  classes, 
                  image_dir,
                  data_df,
+                 bindings,
                  save_csv="annotation.csv",
                  resize_w: int=382,
                  resize_h: int=470,
                  window_w: int=764,
                  window_h: int=1200,
                  start_i: int=0):
-        
         self.master = master
         self.CURR_I = start_i
         self.master.title("Embryo " + str(self.CURR_I))
         self.master.geometry(str(window_w)+"x"+str(window_h))
 
         self.save_csv = save_csv
+        
+        self.bindings = bindings
 
-        self.classes = classes
+        self.classes = np.array(classes)
 
         self.data_df = data_df
 
@@ -80,6 +82,20 @@ class AnnotationInterface:
         print("Showing previous picture")	
         if(self.CURR_I > 0):
             self.CURR_I = self.CURR_I - 1
-
         self.update_image()
         self.update_labels()
+
+    def pressEvent(self, event):
+        self.set_to(self.CURR_I, self.bindings[event.char])
+
+    def set_to(self, i, curr_class):
+        assert curr_class in list(self.classes), "invalid class"
+        if self.data_df.iloc[i,1+np.argwhere(self.classes == curr_class)[0][0]] == 1:       
+            self.data_df.iloc[i,1+np.argwhere(self.classes == curr_class)[0][0]] = 0
+            print("Set to 0")
+        else:
+            self.data_df.iloc[i,1+np.argwhere(self.classes == curr_class)[0][0]] = 1
+            print("Set to 1")
+        self.update_labels()
+
+        # return lambda curr_class, ai: set_to(ai=ai, i=ai.CURR_I, curr_class=curr_class)

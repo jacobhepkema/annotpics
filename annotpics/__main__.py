@@ -75,18 +75,22 @@ def main(image_dir, bindings_json, csv,
         annotations = pd.read_csv(csv)
         annotation_classes = [x for i,x in 
                               enumerate(annotations.columns) if i>0]
-    print("annotations =", annotations)
-    print(annotations['image'])
-    
+
     root = Tk()
 
-    ai = AnnotationInterface(root, classes, image_dir,
+    ai = AnnotationInterface(master=root, 
+                             bindings=bindings,
+                             classes=classes, 
+                             image_dir=image_dir,
                              data_df=annotations,
                              save_csv=o, 
                              window_w = window_w, window_h = window_h,
                              start_i = start_i)
 
     # Key bindings
+    for curr_key, curr_class in zip(bindings.keys(), classes):
+        print(f"bound {curr_key} to {curr_class}")
+        root.bind(curr_key, ai.pressEvent)
     root.bind("<Return>", ai.prev_picture)
     root.bind("<space>", ai.next_picture)
     root.mainloop()
