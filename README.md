@@ -4,9 +4,9 @@ Annotate pictures with binary labels for given classes and keybindings. Experime
 
 Press space to go to the next picture, press return to go to the previous picture.
 
-Given [a file that specifies keybindings (argument BINDINGS\_JSON)](#Key-bindings), the program will go through the images in `IMAGE_DIR` and annotate to output file `--o` (default: `output.csv`). With every new annotation, the annotations are saved to the output file.
+Given [a file that specifies keybindings (argument BINDINGS\_JSON)](#Key-bindings), the program will go through the images in `IMAGE_DIR` and you can switch the annotation of a class using the specified keybindings. It will save to output file `--o` (default: `output.csv`). With every new annotation, the annotations are saved to the output file.
 
-It is also possible to start from an existing annotation by using the `--csv` argument. Currently, the keybinding categories have to exactly match the column names of the annotation csv (it cannot be a subset at the time).
+It is also possible to start from an existing annotation by using the `--csv` argument. Currently, the keybinding categories have to exactly match the column names of the annotation csv (it cannot be a subset at the time). The output file is different to the input `--csv` argument so that it does not overwrite.
 
 ## Install
 
