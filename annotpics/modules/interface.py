@@ -19,16 +19,7 @@ class AnnotationInterface:
                  resize_h: int=470,
                  window_w: int=764,
                  window_h: int=1200,
-{
-    "bindings": {
-        "A": "A_category",
-        "B": "B_category",
-        "C": "C_category",
-        "D": "D_category",
-        "E": "E_category",
-        "F": "F_category"
-    }
-}                 start_i: int=0):
+                 start_i: int=0):
         self.master = master
         self.CURR_I = start_i
         self.master.title("Embryo " + str(self.CURR_I))
