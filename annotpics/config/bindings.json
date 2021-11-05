@@ -1,0 +1,10 @@
+{
+    "bindings": {
+        "A": "A_category",
+        "B": "B_category",
+        "C": "C_category",
+        "D": "D_category",
+        "E": "E_category",
+        "F": "F_category"
+    }
+}
