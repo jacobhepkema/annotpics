@@ -6,10 +6,14 @@ import re
 import pandas as pd
 import numpy as np
 
+<<<<<<< HEAD
 from PIL import ImageTk, Image
 from tkinter import Tk
 
 from annotpics.modules.interface import AnnotationInterface
+=======
+from .modules.interface import AnnotationInterface
+>>>>>>> cb13ef49cd8ac28d3cb68c5a43d4f37c8841a1fa
 
 @click.version_option("0.0.1")
 @click.command()
