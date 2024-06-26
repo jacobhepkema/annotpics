@@ -22,7 +22,7 @@ class AnnotationInterface:
                  start_i: int=0):
         self.master = master
         self.CURR_I = start_i
-        self.master.title("Embryo " + str(self.CURR_I))
+        self.master.title("Image " + str(self.CURR_I))
         self.master.geometry(str(window_w)+"x"+str(window_h))
 
         self.save_csv = save_csv
