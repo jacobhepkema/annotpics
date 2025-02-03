@@ -24,7 +24,7 @@ from .modules.interface import AnnotationInterface
 @click.option('--window_h', default=1200, required=False)
 @click.option('--resize_w', default=382, required=False)
 @click.option('--resize_h', default=470, required=False)
-@click.option('--filetype', default='jpg', required=False)
+@click.option('--filetype', default='any', required=False)
 def main(image_dir, bindings_json, csv,
          o, start_i,
          window_w, window_h,
@@ -54,8 +54,12 @@ def main(image_dir, bindings_json, csv,
     print("bindings =", bindings)
     classes = list(bindings.values())
     print("classes = ", classes)
-    filetype_regex = re.compile(f".+\\.{filetype}$")
-
+    if filetype.lower() == 'any':
+        filetype_regex = re.compile(".*\\.(jpg|jpeg|png|gif)$", re.IGNORECASE)
+    elif filetype.lower() in ['jpg', 'jpeg']:
+        filetype_regex = re.compile(".*\\.(jpg|jpeg)$", re.IGNORECASE)
+    else:
+        filetype_regex = re.compile(f".+\\.{filetype}$", re.IGNORECASE)    
     # Default behaviour: if CSV is not provided, create empty dataframe with the
     #   categories set to the classes from the keybindings and the number of 
     #   rows corresponding to the pictures .
