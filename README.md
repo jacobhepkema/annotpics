@@ -30,7 +30,7 @@ Options:
   --window_h INTEGER  Window height in pixels
   --resize_w INTEGER  
   --resize_h INTEGER  
-  --filetype TEXT     Filetype of images in IMAGE_DIR [jpg]
+  --filetype TEXT     Filetype of images in IMAGE_DIR [any]
   --version           Show the version and exit.
   --help              Show this message and exit.
 ```
