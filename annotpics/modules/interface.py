@@ -1,4 +1,4 @@
-from tkinter import *
+from tkinter import Label, LEFT
 import pandas as pd
 import numpy as np
 from PIL import ImageTk, Image
