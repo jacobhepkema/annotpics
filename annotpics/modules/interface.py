@@ -1,99 +1,95 @@
-from tkinter import Label, LEFT
-import pandas as pd
-import numpy as np
-from PIL import ImageTk, Image
+from tkinter import Label, LEFT, Frame, BOTH
+import logging
 
-
-class AnnotationInterface:
-    r"""
-    EXPERIMENTAL
-    """
-    def __init__(self, 
-                 master, 
-                 classes, 
-                 image_dir,
-                 data_df,
-                 bindings,
-                 save_csv="annotation.csv",
-                 resize_w: int=382,
-                 resize_h: int=470,
-                 window_w: int=764,
-                 window_h: int=1200,
-                 start_i: int=0):
+class AnnotationUI:
+    def __init__(self, master, data_manager, image_manager, bindings, start_i=0, window_w=764, window_h=1200):
         self.master = master
-        self.CURR_I = start_i
-        self.master.title("Image " + str(self.CURR_I))
-        self.master.geometry(str(window_w)+"x"+str(window_h))
-
-        self.save_csv = save_csv
-        
+        self.data_manager = data_manager
+        self.image_manager = image_manager
         self.bindings = bindings
+        self.curr_i = start_i
 
-        self.classes = np.array(classes)
+        self.master.geometry(f"{window_w}x{window_h}")
+        self.master.title(f"Image {self.curr_i}")
+        self.master.bind("<Return>", self.prev_picture)
+        self.master.bind("<space>", self.next_picture)
+        for key in self.bindings.keys():
+            self.master.bind(key, self.press_event)
 
-        self.data_df = data_df
+        self.master.protocol("WM_DELETE_WINDOW", self.on_closing)
 
-        self.image_dir = image_dir
-        self.image_path = image_dir + "/" + self.data_df["image"][self.CURR_I]
+        # Image Panel
+        self.img_panel = Label(self.master)
+        self.img_panel.pack(side="bottom", fill="both", expand="yes")
 
-        self.IMG = ImageTk.PhotoImage(Image.open(self.image_path).resize((382, 470)))
-        self.IMG_PANEL = Label(self.master, image=self.IMG)
-        self.IMG_PANEL.pack(side="bottom", fill="both", expand="yes")
+        # Annotation Panel
+        self.annotation_frame = Frame(self.master)
+        self.annotation_frame.pack(side="bottom", fill="both", expand="yes")
+        self.annotation_labels = {}
 
-        self.curr_values = np.array(self.data_df.iloc[self.CURR_I,1:])
-        self.value_table = [x for x in zip(np.array(self.classes)[self.curr_values > 0], self.curr_values[self.curr_values > 0])]
-        self.total_rows = sum(self.curr_values > 0)
-        self.TEXT = [str(x[1])+"\t"+str(x[0]) for x in self.value_table]
-        self.TEXT = "\n".join(self.TEXT)
+        self._create_annotation_labels()
+        self.update_ui()
 
-        self.TEXT_PANEL = Label(self.master, text=self.TEXT, anchor="e", justify=LEFT, font=("Courier", 20))
-        self.TEXT_PANEL.pack(side="bottom", expand="yes")
+    def _create_annotation_labels(self):
+        # Using a more structured grid layout
+        self.annotation_frame.columnconfigure(1, weight=1)
+        row = 0
+        for key, class_name in self.bindings.items():
+            key_label = Label(self.annotation_frame, text=f"[{key}]", font=("Courier", 14))
+            key_label.grid(row=row, column=0, sticky='w', padx=5, pady=2)
+
+            label = Label(self.annotation_frame, text=class_name, font=("Courier", 14), anchor="w")
+            label.grid(row=row, column=1, sticky='we', padx=5, pady=2)
+            self.annotation_labels[class_name] = label
+            row += 1
+
+    def update_ui(self):
+        self.master.title(f"Picture {self.curr_i}")
+        self.update_image()
+        self.update_labels()
+
+    def update_image(self):
+        image_path = self.data_manager.get_image_path(self.curr_i, self.image_manager.image_dir)
+        photo_img = self.image_manager.get_image(image_path)
+        self.img_panel.configure(image=photo_img)
+        self.img_panel.image = photo_img
 
     def update_labels(self):
-        print(self.CURR_I)
-        self.curr_values = np.array(self.data_df.iloc[self.CURR_I,1:])
-        self.value_table = [x for x in zip(np.array(self.classes)[self.curr_values > 0], self.curr_values[self.curr_values > 0])]
-        self.total_rows = sum(self.curr_values > 0)
-        self.TEXT = [str(x[1])+"\t"+str(x[0]) for x in self.value_table]
-        self.TEXT = "\n".join(self.TEXT)
-
-        self.TEXT_PANEL.configure(text=self.TEXT)
-        self.TEXT_PANEL.text = self.TEXT
-
-        self.master.title("Picture " + str(self.CURR_I))
-        
-    def update_image(self):
-        self.image_path = f"{self.image_dir}/{self.data_df['image'][self.CURR_I]}"
-        self.IMG = ImageTk.PhotoImage(Image.open(self.image_path).resize((382, 470)))
-        self.IMG_PANEL.configure(image=self.IMG)
-        self.IMG_PANEL.image = self.IMG
+        annotations = self.data_manager.get_annotations(self.curr_i)
+        for class_name, value in annotations.items():
+            if class_name in self.annotation_labels:
+                label = self.annotation_labels[class_name]
+                if value == 1:
+                    label.config(fg="green", text=f"{class_name} (ON)")
+                else:
+                    label.config(fg="red", text=f"{class_name} (OFF)")
 
     def next_picture(self, event):
-        self.data_df.to_csv(self.save_csv, index=False)
-        print("Saved data")
-
-        print("Showing next picture")	
-        self.CURR_I = self.CURR_I + 1
-
-        self.update_image()
-        self.update_labels()
+        if self.curr_i < self.data_manager.num_images - 1:
+            self.curr_i += 1
+            self.update_ui()
+            logging.info(f"Showing next picture: {self.curr_i}")
+        else:
+            logging.info("Already at the last picture.")
 
     def prev_picture(self, event):
-        print("Showing previous picture")	
-        if(self.CURR_I > 0):
-            self.CURR_I = self.CURR_I - 1
-        self.update_image()
-        self.update_labels()
-
-    def pressEvent(self, event):
-        self.set_to(self.CURR_I, self.bindings[event.char])
-
-    def set_to(self, i, curr_class):
-        assert curr_class in list(self.classes), "invalid class"
-        if self.data_df.iloc[i,1+np.argwhere(self.classes == curr_class)[0][0]] == 1:       
-            self.data_df.iloc[i,1+np.argwhere(self.classes == curr_class)[0][0]] = 0
-            print("Set to 0")
+        if self.curr_i > 0:
+            self.curr_i -= 1
+            self.update_ui()
+            logging.info(f"Showing previous picture: {self.curr_i}")
         else:
-            self.data_df.iloc[i,1+np.argwhere(self.classes == curr_class)[0][0]] = 1
-            print("Set to 1")
-        self.update_labels()
+            logging.info("Already at the first picture.")
+
+    def press_event(self, event):
+        class_name = self.bindings.get(event.char)
+        if class_name:
+            new_value = self.data_manager.toggle_annotation(self.curr_i, class_name)
+            logging.info(f"Set annotation for '{class_name}' to {new_value}")
+            self.update_labels()
+        else:
+            logging.warning(f"No binding found for key: {event.char}")
+
+    def on_closing(self):
+        logging.info("Window closed, saving annotations...")
+        self.data_manager.save()
+        self.master.destroy()

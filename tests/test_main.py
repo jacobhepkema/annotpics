@@ -34,31 +34,36 @@ def test_main_help(runner):
     assert 'Picture annotation tool' in result.output
 
 def test_main_no_csv(runner, setup_test_files, mocker):
-    mocker.patch('annotpics.__main__.AnnotationInterface')
+    mock_ui = mocker.patch('annotpics.__main__.AnnotationUI')
+    mock_data = mocker.patch('annotpics.__main__.AnnotationData')
+    mock_image = mocker.patch('annotpics.__main__.ImageManager')
     mocker.patch('annotpics.__main__.Tk')
 
     args = [
         setup_test_files["image_dir"],
         setup_test_files["bindings_path"],
         '--o', setup_test_files["output_csv"],
+        '--resize_w', '100',
+        '--resize_h', '200',
     ]
     result = runner.invoke(main, args)
 
     assert result.exit_code == 0
-    # Check that AnnotationInterface was called with the correct arguments
-    # This part is a bit tricky because we can't directly inspect the `ai` object.
-    # A better approach would be to have main() return the dataframe for inspection.
-    # For now, we just check that the command runs without error.
-    # A more advanced test could patch `pd.DataFrame.to_csv` and check its inputs.
+    mock_data.assert_called_once()
+    mock_image.assert_called_once_with(resize_w=100, resize_h=200)
+    mock_ui.assert_called_once()
 
 def test_main_with_csv(runner, setup_test_files, mocker):
-    mocker.patch('annotpics.__main__.AnnotationInterface')
+    mock_ui = mocker.patch('annotpics.__main__.AnnotationUI')
+    mock_data = mocker.patch('annotpics.__main__.AnnotationData')
+    mock_image = mocker.patch('annotpics.__main__.ImageManager')
     mocker.patch('annotpics.__main__.Tk')
 
     csv_path = setup_test_files["output_csv"]
-    data = {"image": ["test.jpg"], "jeans": [1], "shirt": [0]}
-    df = pd.DataFrame(data)
-    df.to_csv(csv_path, index=False)
+    # Create a dummy csv to avoid FileNotFoundError
+    with open(csv_path, 'w') as f:
+        f.write("image,jeans,shirt\n")
+        f.write("test.jpg,1,0\n")
 
     args = [
         setup_test_files["image_dir"],
@@ -69,3 +74,8 @@ def test_main_with_csv(runner, setup_test_files, mocker):
     result = runner.invoke(main, args)
 
     assert result.exit_code == 0
+    mock_data.assert_called_once()
+    # Check that csv argument was passed to AnnotationData
+    assert mock_data.call_args[1]['csv'] == csv_path
+    mock_image.assert_called_once()
+    mock_ui.assert_called_once()
