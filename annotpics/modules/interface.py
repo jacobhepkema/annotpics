@@ -1,4 +1,4 @@
-from tkinter import Label, LEFT, Frame, BOTH
+from tkinter import ttk, font
 import logging
 
 class AnnotationUI:
@@ -9,36 +9,55 @@ class AnnotationUI:
         self.bindings = bindings
         self.curr_i = start_i
 
+        # --- Basic Setup ---
         self.master.geometry(f"{window_w}x{window_h}")
         self.master.title(f"Image {self.curr_i}")
+        self.master.protocol("WM_DELETE_WINDOW", self.on_closing)
+
+        # --- Key Bindings ---
         self.master.bind("<Return>", self.prev_picture)
         self.master.bind("<space>", self.next_picture)
         for key in self.bindings.keys():
             self.master.bind(key, self.press_event)
 
-        self.master.protocol("WM_DELETE_WINDOW", self.on_closing)
+        # --- Styling ---
+        self.style = ttk.Style()
+        self.style.theme_use('clam')  # 'clam' is a good-looking theme
+        self.style.configure("TFrame", background="#f0f0f0")
+        self.style.configure("TLabel", background="#f0f0f0", font=("Helvetica", 14))
+        self.style.configure("Green.TLabel", foreground="green", font=("Helvetica", 14, "bold"))
+        self.style.configure("Red.TLabel", foreground="red", font=("Helvetica", 14))
+        self.style.configure("Key.TLabel", font=("Courier", 14, "bold"))
 
-        # Image Panel
-        self.img_panel = Label(self.master)
-        self.img_panel.pack(side="bottom", fill="both", expand="yes")
+        # --- Main Layout ---
+        self.content_frame = ttk.Frame(self.master, padding=(10, 10, 10, 10))
+        self.content_frame.pack(fill="both", expand=True)
 
-        # Annotation Panel
-        self.annotation_frame = Frame(self.master)
-        self.annotation_frame.pack(side="bottom", fill="both", expand="yes")
+        # --- Image Panel ---
+        self.img_panel = ttk.Label(self.content_frame, anchor="center")
+        self.img_panel.pack(side="top", fill="both", expand=True, pady=(0, 10))
+
+        # --- Separator ---
+        separator = ttk.Separator(self.content_frame, orient='horizontal')
+        separator.pack(side="top", fill='x', pady=5)
+
+        # --- Annotation Panel ---
+        self.annotation_frame = ttk.Frame(self.content_frame)
+        self.annotation_frame.pack(side="bottom", fill="x", expand=False)
         self.annotation_labels = {}
-
         self._create_annotation_labels()
+
+        # --- Initial UI Update ---
         self.update_ui()
 
     def _create_annotation_labels(self):
-        # Using a more structured grid layout
         self.annotation_frame.columnconfigure(1, weight=1)
         row = 0
         for key, class_name in self.bindings.items():
-            key_label = Label(self.annotation_frame, text=f"[{key}]", font=("Courier", 14))
-            key_label.grid(row=row, column=0, sticky='w', padx=5, pady=2)
+            key_label = ttk.Label(self.annotation_frame, text=f"[{key}]", style="Key.TLabel")
+            key_label.grid(row=row, column=0, sticky='w', padx=(5, 10))
 
-            label = Label(self.annotation_frame, text=class_name, font=("Courier", 14), anchor="w")
+            label = ttk.Label(self.annotation_frame, text=class_name, anchor="w")
             label.grid(row=row, column=1, sticky='we', padx=5, pady=2)
             self.annotation_labels[class_name] = label
             row += 1
@@ -50,19 +69,26 @@ class AnnotationUI:
 
     def update_image(self):
         image_path = self.data_manager.get_image_path(self.curr_i, self.image_manager.image_dir)
-        photo_img = self.image_manager.get_image(image_path)
-        self.img_panel.configure(image=photo_img)
-        self.img_panel.image = photo_img
+        try:
+            photo_img = self.image_manager.get_image(image_path)
+            self.img_panel.configure(image=photo_img)
+            self.img_panel.image = photo_img
+        except Exception as e:
+            logging.error(f"Failed to load image: {image_path}. Error: {e}")
+            # Optionally display a placeholder or error message in the UI
+            self.img_panel.configure(text=f"Error loading image:\n{image_path}", image=None)
+            self.img_panel.image = None
 
     def update_labels(self):
         annotations = self.data_manager.get_annotations(self.curr_i)
         for class_name, value in annotations.items():
             if class_name in self.annotation_labels:
                 label = self.annotation_labels[class_name]
+                text = f"{class_name}"
                 if value == 1:
-                    label.config(fg="green", text=f"{class_name} (ON)")
+                    label.config(style="Green.TLabel", text=f"{text} (ON)")
                 else:
-                    label.config(fg="red", text=f"{class_name} (OFF)")
+                    label.config(style="Red.TLabel", text=f"{text} (OFF)")
 
     def next_picture(self, event):
         if self.curr_i < self.data_manager.num_images - 1:
